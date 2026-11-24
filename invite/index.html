@@ -1,0 +1,95 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="robots" content="noindex">
+<meta property="og:title" content="까르르 친구 초대">
+<meta property="og:description" content="링크를 누르면 까르르에서 바로 서로 친구가 돼요">
+<meta property="og:image" content="https://kahlil2222.github.io/kkareureu-legal/invite/icon.png">
+<title>까르르 친구 초대</title>
+<style>
+:root { color-scheme: light; font-family: -apple-system, BlinkMacSystemFont, "Apple SD Gothic Neo", "Segoe UI", sans-serif; }
+* { box-sizing: border-box; }
+body { margin: 0; color: #262a4f; background: #eaf3fd; }
+main { max-width: 480px; min-height: 100vh; margin: 0 auto; padding: 40px 22px 56px; text-align: center; }
+.icon { width: 120px; height: 120px; border-radius: 28px; box-shadow: 0 8px 24px rgba(38, 42, 79, 0.18); }
+h1 { margin: 22px 0 8px; font-size: 1.7rem; letter-spacing: -0.03em; word-break: keep-all; }
+.sub { margin: 0 0 26px; color: #6f6b8e; word-break: keep-all; line-height: 1.6; }
+.btn { display: block; width: 100%; padding: 18px 16px; margin: 0 0 12px; border-radius: 22px; border: 0; font: inherit; font-size: 1.15rem; font-weight: 700; text-decoration: none; cursor: pointer; }
+.primary { background: #ffd84d; color: #262a4f; box-shadow: 0 5px 0 #e0b52a; }
+.secondary { background: #fff; color: #262a4f; box-shadow: 0 5px 0 #d5d8e0; }
+.note { margin: 4px 0 22px; color: #6f6b8e; font-size: 0.92rem; word-break: keep-all; line-height: 1.6; }
+.code { margin: 26px 0 0; padding: 18px; border-radius: 20px; background: #fff; }
+.code b { display: block; margin: 6px 0; font-size: 2rem; letter-spacing: 0.18em; }
+.code small { color: #6f6b8e; word-break: keep-all; }
+.copy { margin-top: 10px; padding: 8px 18px; border-radius: 999px; border: 0; background: #262a4f; color: #fff; font: inherit; cursor: pointer; }
+.hidden { display: none; }
+.err { color: #ff6f91; }
+</style>
+</head>
+<body>
+<main>
+  <img class="icon" src="icon.png" alt="까르르">
+  <h1 id="title">친구가 까르르에 초대했어요!</h1>
+  <p class="sub">버튼을 누르면 까르르가 열리고<br>바로 서로 친구가 돼요</p>
+
+  <div id="ok">
+    <a id="open" class="btn primary" href="#">까르르 열고 친구 되기</a>
+    <a id="play" class="btn secondary hidden" href="#">Google Play에서 받기</a>
+    <p id="playNote" class="note hidden">앱이 없으면 위 버튼이 Play 스토어로 데려가요.<br>설치하고 처음 켜면 바로 친구가 돼요.</p>
+    <p id="iosNote" class="note hidden">iPhone 앱은 곧 App Store에 나와요.<br>지금 테스트 중이라면 앱을 설치한 뒤 위 버튼을 눌러 주세요.</p>
+    <div class="code">
+      <small>초대 코드</small>
+      <b id="code">········</b>
+      <small>버튼이 안 되면 까르르 → 친구 창 입력 칸에 이 코드를 적어도 돼요</small><br>
+      <button id="copy" class="copy" type="button">코드 복사</button>
+    </div>
+  </div>
+  <p id="bad" class="note err hidden">초대 링크가 올바르지 않아요.<br>친구에게 링크를 다시 받아 주세요.</p>
+</main>
+<script>
+(function () {
+  var PKG = "com.dongmalcompany.kkareureu";
+  var SUPABASE = "https://oletnlrmlwvhczybrofa.supabase.co";
+  var KEY = "sb_publishable_yCqK59jrQzrlfxT7P8LbfA_9swrz2Ge"; // 앱에 들어 있는 공개(publishable) 키. 초대한 사람 이름만 읽음
+  var c = (new URLSearchParams(location.search).get("c") || "").toUpperCase().replace(/[^A-Z0-9]/g, "");
+  if (!/^[A-HJ-NP-Z2-9]{8}$/.test(c)) {
+    document.getElementById("ok").className = "hidden";
+    document.getElementById("bad").className = "note err";
+    return;
+  }
+  document.getElementById("code").textContent = c;
+  var ua = navigator.userAgent;
+  var android = /Android/i.test(ua);
+  var ios = /iPhone|iPad|iPod/i.test(ua);
+  var play = "https://play.google.com/store/apps/details?id=" + PKG + "&referrer=" + encodeURIComponent("kkareureu_invite_" + c);
+  var open = document.getElementById("open");
+  if (android) {
+    // 앱이 있으면 열고, 없으면 Play 스토어(설치 정보에 초대 코드를 담아)로
+    open.href = "intent://friend?c=" + c + "#Intent;scheme=kkareureu;package=" + PKG +
+      ";S.browser_fallback_url=" + encodeURIComponent(play) + ";end";
+    var p = document.getElementById("play");
+    p.href = play; p.className = "btn secondary";
+    document.getElementById("playNote").className = "note";
+  } else {
+    open.href = "kkareureu://friend?c=" + c;
+    if (ios) document.getElementById("iosNote").className = "note";
+  }
+  document.getElementById("copy").onclick = function () {
+    var done = function () { document.getElementById("copy").textContent = "복사했어요"; };
+    if (navigator.clipboard) navigator.clipboard.writeText(c).then(done, done); else done();
+  };
+  // 초대한 사람 이름 (없어도 페이지는 그대로 동작)
+  fetch(SUPABASE + "/rest/v1/rpc/peek_friend_invite", {
+    method: "POST",
+    headers: { "apikey": KEY, "Content-Type": "application/json" },
+    body: JSON.stringify({ p_token: c })
+  }).then(function (r) { return r.json(); }).then(function (o) {
+    if (o && o.result === "ok" && o.nickname) document.getElementById("title").textContent = o.nickname + "님이 까르르에 초대했어요!";
+    else if (o && o.result === "expired") document.getElementById("title").textContent = "지난 초대예요. 친구에게 새 링크를 받아 주세요";
+  }).catch(function () {});
+})();
+</script>
+</body>
+</html>
